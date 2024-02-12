@@ -77,11 +77,11 @@ contract Binary is ERC2048{
 	function tokenURI(uint256 id) pure public override returns (string memory) {
         uint8 level = _getNftLevelByNftId(id);
         string memory idStr = StringUtils.uintToString(id);
-        string memory levelStr = StringUtils.uintToString(level);
+        string memory numberStr = StringUtils.uintToString(2 ** level);
 
-        string memory name = StringUtils.concat(StringUtils.concat('"name":"Binary#', idStr), '",');
+        string memory name = StringUtils.concat(StringUtils.concat('"name":"Binary:', idStr), '",');
         string memory description = '"description":"A collection of 1048576 replicants enabled by ERC2048, an experimental token standard.",';
-        string memory image = StringUtils.concat(StringUtils.concat('"image":"https://github.com/erc2048/erc2048/blob/dev/assets/', levelStr), '.svg"');
+        string memory image = StringUtils.concat(StringUtils.concat('"image":"https://raw.githubusercontent.com/erc2048/erc2048/dev/assets/', numberStr), '.svg"');
         string memory json = StringUtils.concat('{', name);
         json = StringUtils.concat(json, description);
         json = StringUtils.concat(json, image);
