@@ -75,10 +75,11 @@ contract Binary is ERC2048{
 	}
 
 	function tokenURI(uint256 id) pure public override returns (string memory) {
+        string memory s = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect x='0' y='0' width='100' height='100' fill='%23EEE4DA' rx='6' ry='6' /%3E%3Ctext x='50' y='50' alignment-baseline='middle' text-anchor='middle' font-size='20' class='number' fill='%23776E65'%3E";
 		uint8 level = _getNftLevelByNftId(id);
 		string memory levelString = StringUtils.uint256ToString(2 ** uint256(level));
-		string memory s = StringUtils.concat('<svg width="100" height="100" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="100" height="100" fill="#EEE4DA" rx="6" ry="6" /><text x="50" y="50" alignment-baseline="middle" text-anchor="middle" font-size="40" class="number" fill="#776E65">', levelString);
-		return StringUtils.concat(s, '</text></svg>');
+		s = StringUtils.concat(s, levelString);
+		return StringUtils.concat(s, "%3C/text%3E%3C/svg%3E%0A");
 	}
 
 	function getOwnerNfts(address owner) public view returns(Nft[] memory) {
