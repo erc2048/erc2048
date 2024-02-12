@@ -106,6 +106,7 @@ abstract contract ERC2048 {
 
     /// @notice Function to find owner of a given native token
     function ownerOf(uint256 id) public view virtual returns (address owner) {
+        // TODO whether token exists
 		(uint32 userId, ) = _getUserIdAndLevel(id);
 		owner = ownerOfUserId[userId];
         if (owner == address(0)) {
@@ -130,6 +131,8 @@ abstract contract ERC2048 {
             if (msg.sender != owner && !isApprovedForAll[owner][msg.sender]) {
                 revert Unauthorized();
             }
+
+            // todo whether token exists
 
             getApproved[amountOrId] = spender;
 
@@ -175,6 +178,8 @@ abstract contract ERC2048 {
             ) {
                 revert Unauthorized();
             }
+
+            // todo whether token exists
 
 			_transfer(from, to, _getTokenAmount(level));
 
