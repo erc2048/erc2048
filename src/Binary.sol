@@ -80,7 +80,7 @@ contract Binary is ERC2048{
         string memory levelStr = StringUtils.uintToString(level);
 
         string memory name = StringUtils.concat(StringUtils.concat('"name":"Binary#', idStr), '",');
-        string memory description = StringUtils.concat('"description":"A collection of 1048576 replicants enabled by ERC2048, an experimental token standard.",');
+        string memory description = '"description":"A collection of 1048576 replicants enabled by ERC2048, an experimental token standard.",';
         string memory image = StringUtils.concat(StringUtils.concat('"image":"https://github.com/erc2048/erc2048/blob/dev/assets/', levelStr), '.svg"');
         string memory json = StringUtils.concat('{', name);
         json = StringUtils.concat(json, description);
