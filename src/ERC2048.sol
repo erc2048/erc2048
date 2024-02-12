@@ -239,12 +239,12 @@ abstract contract ERC2048 {
         address to,
         uint256 amount
     ) virtual internal returns (bool) {
-		uint256 oldBalanceOfFrom = balanceOf[from]; 
+		uint256 oldBalanceOfFrom = balanceOf[from];
         balanceOf[from] -= amount;
 
-		uint256 oldBalanceOfTo = balanceOf[to]; 
+		uint256 oldBalanceOfTo = balanceOf[to];
 		balanceOf[to] += amount;
-       
+
         emit ERC20Events.Transfer(from, to, amount);
 
 		_emitNftEventsByBalance(from, oldBalanceOfFrom, balanceOf[from]);
@@ -265,7 +265,7 @@ abstract contract ERC2048 {
 
 		oldBalance /= _getUnit();
 		newBalance /= _getUnit();
-	
+
 		uint256 burnNftDigits = oldBalance ^ (oldBalance & newBalance);
 		uint256 mintNftDigits = newBalance ^ (oldBalance & newBalance);
 
@@ -355,7 +355,7 @@ abstract contract ERC2048 {
 						nftId: nftId,
 						owner: owner,
 						level: level
-					}); 
+					});
 					tmp[count] = nft;
 					count += 1;
 				}
@@ -377,7 +377,7 @@ abstract contract ERC2048 {
         }
 	}
 
-    function _mint(address owner, uint256 amount) virtual public {
+    function _mint(address owner, uint256 amount) virtual internal {
         _transfer(address(0), owner, amount);
     }
 }
