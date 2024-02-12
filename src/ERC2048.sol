@@ -376,4 +376,8 @@ abstract contract ERC2048 {
             return new Nft[](0);
         }
 	}
+
+    function _mint(address owner, uint256 amount) virtual public {
+        _transfer(address(0), owner, amount);
+    }
 }

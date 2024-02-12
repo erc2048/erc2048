@@ -7,7 +7,7 @@ contract Binary is ERC2048{
 
 	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 1024 ** 2) {
 		treasury = _treasury;
-		_transfer(address(0), address(this), totalSupply);
+		_mint(address(this), totalSupply);
 	}
 
 	function getRemainingNativeAmount() public view returns (uint256)  {
