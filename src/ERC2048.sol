@@ -40,7 +40,6 @@ abstract contract ERC721Receiver {
 ///         design.
 ///
 abstract contract ERC2048 {
- 
     event ApprovalForAll(
         address indexed owner,
         address indexed operator,

@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 import "./ERC2048.sol";
 
 contract Binary is ERC2048{
-
 	address payable public treasury;
 
 	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 1024 ** 2) {
