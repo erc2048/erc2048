@@ -4,26 +4,28 @@ import "./ERC2048.sol";
 
 contract Binary is ERC2048{
 
-	address payable public initialMintRecipient;
+	address payable public treasury;
 
-	constructor(address payable _recipient) ERC2048("Binary", "BINARY", 18, 1048576) {
-		balanceOf[address(this)] = 1048576 * _getUnit();
-		initialMintRecipient = _recipient;
+	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 1024 ** 2) {
+		balanceOf[address(this)] = 1024 ** 2 * _getUnit();
+		treasury = _treasury;
 	}
 
-	function getRemainInitialNft() public view returns(uint256)  {
+	function getRemainingNativeAmount() public view returns (uint256)  {
 		return balanceOf[address(this)] / _getUnit();
 	}
 
-	function getInitialNftMintPrice(uint256 mintNftTimes) public pure returns(uint256) {
-		return mintNftTimes * 10 ** 15 ;
+	function getInitialMintPrice(uint256 nativeAmount) public pure returns (uint256) {
+		return nativeAmount * 10 ** 15 ;
 	}
 
-	function initialMint(uint256 times) public payable {
-		require(times>0 && times<=balanceOf[address(this)], "The nft is not sufficient, use getRemainInitialNft to get remain.");
-		require(msg.value == getInitialNftMintPrice(times), "The amount of eth is not correct, use getInitialNftMintPrice to get correct price.");
-		_transfer(address(this), msg.sender, _getUnit() * times);
-		initialMintRecipient.transfer(msg.value);
+	function initialMint(uint256 nativeAmount) public payable {
+		uint256 amount = nativeAmount * _getUnit();
+		require(amount > 0, "Mint amount should > 0");
+		require(amount <= balanceOf[address(this)], "Exceed max mint amount");
+		require(msg.value == getInitialMintPrice(nativeAmount), "Attached Ethers doesn't match");
+		_transfer(address(this), msg.sender, amount);
+		treasury.transfer(msg.value);
 	}
 
 	function tokenURI(uint256 id) pure public override returns (string memory) {
