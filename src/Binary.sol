@@ -5,7 +5,7 @@ import "./ERC2048.sol";
 pragma solidity ^0.8.0;
 
 library StringUtils {
-    function uint256ToString(uint256 value) internal pure returns (string memory) {
+    function uintToString(uint256 value) internal pure returns (string memory) {
         if (value == 0) {
             return "0";
         }
@@ -75,11 +75,18 @@ contract Binary is ERC2048{
 	}
 
 	function tokenURI(uint256 id) pure public override returns (string memory) {
-        string memory s = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect x='0' y='0' width='100' height='100' fill='%23EEE4DA' rx='6' ry='6' /%3E%3Ctext x='50' y='50' alignment-baseline='middle' text-anchor='middle' font-size='20' class='number' fill='%23776E65'%3E";
-		uint8 level = _getNftLevelByNftId(id);
-		string memory levelString = StringUtils.uint256ToString(2 ** uint256(level));
-		s = StringUtils.concat(s, levelString);
-		return StringUtils.concat(s, "%3C/text%3E%3C/svg%3E%0A");
+        uint8 level = _getNftLevelByNftId(id);
+        string memory idStr = StringUtils.uintToString(id);
+        string memory levelStr = StringUtils.uintToString(level);
+
+        string memory name = StringUtils.concat(StringUtils.concat('"name":"Binary#', idStr), '",');
+        string memory description = StringUtils.concat('"description":"A collection of 1048576 replicants enabled by ERC2048, an experimental token standard.",');
+        string memory image = StringUtils.concat(StringUtils.concat('"image":"https://github.com/erc2048/erc2048/blob/dev/assets/', levelStr), '.svg"');
+        string memory json = StringUtils.concat('{', name);
+        json = StringUtils.concat(json, description);
+        json = StringUtils.concat(json, image);
+        json = StringUtils.concat(json, '}');
+        return json;
 	}
 
 	function getOwnerNfts(address owner) public view returns(Nft[] memory) {
