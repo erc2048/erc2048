@@ -203,7 +203,15 @@ abstract contract ERC2048 {
         address to,
         uint256 id
     ) public virtual {
-        safeTransferFrom(from, to, id, "");
+        transferFrom(from, to, id);
+
+        if (
+            to.code.length != 0 &&
+            ERC721Receiver(to).onERC721Received(msg.sender, from, id, "") !=
+            ERC721Receiver.onERC721Received.selector
+        ) {
+            revert UnsafeRecipient();
+        }
     }
 
     /// @notice Function for native transfers with contract support and callback data
