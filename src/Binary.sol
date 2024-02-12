@@ -86,7 +86,7 @@ contract Binary is ERC2048{
         json = StringUtils.concat(json, description);
         json = StringUtils.concat(json, image);
         json = StringUtils.concat(json, '}');
-        return json;
+        return StringUtils.concat('data:application/json;utf8,', json);
 	}
 
 	function getOwnerNfts(address owner) public view returns(Nft[] memory) {
