@@ -101,6 +101,7 @@ abstract contract ERC2048 {
         symbol = _symbol;
         decimals = _decimals;
         totalSupply = _nativeTotalSupply * _getUnit();
+        balanceOf[address(0)] = totalSupply;
     }
 
     /// @notice Function to find owner of a given native token
@@ -258,7 +259,7 @@ abstract contract ERC2048 {
 	}
 
 	function _emitNftEventsByBalance(address owner, uint256 oldBalance, uint256 newBalance) internal {
-		if (owner == address(0) || owner == address(this)) {
+		if (owner == address(0)) {
 			return;
 		}
 
@@ -268,7 +269,7 @@ abstract contract ERC2048 {
 		uint256 burnNftDigits = oldBalance ^ (oldBalance & newBalance);
 		uint256 mintNftDigits = newBalance ^ (oldBalance & newBalance);
 
-		uint32 userId = _getUserIdOrDefault(owner);
+		uint32 userId = _getUserIdOrNew(owner);
 
         uint8 level = 0;
 
@@ -293,10 +294,9 @@ abstract contract ERC2048 {
 			level += 1;
 			mintNftDigits >>= 1;
 		}
-
 	}
 
-	function _getUserIdOrDefault(address owner) internal returns (uint32) {
+	function _getUserIdOrNew(address owner) internal returns (uint32) {
 		if(userIdOfOwner[owner] == 0) {
 			uniqueUserId += 1;
 			userIdOfOwner[owner] = uniqueUserId;
