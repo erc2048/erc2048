@@ -29,7 +29,7 @@ contract Binary is ERC2048{
 		treasury.transfer(msg.value);
 	}
 
-	function tokenURI(uint256 id) override public pure returns (string memory) {
+	function tokenURI(uint256 id) override public view returns (string memory) {
         ownerOf(id); // check NFT exists
 
         uint8 level = _extractLevelFromNftId(id);
