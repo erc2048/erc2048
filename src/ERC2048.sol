@@ -282,7 +282,7 @@ abstract contract ERC2048 {
         return owner != address(0) && nativeBalance & uint256(1) << level > 0;
     }
 
-    function _getNft(uint256 id) internal view returns (Nft) {
+    function _getNft(uint256 id) internal view returns (Nft memory) {
         address owner = _ownerOf(id);
         uint32 ownerId = _extractOwnerIdFromNftId(id);
         uint8 level = _extractLevelFromNftId(id);

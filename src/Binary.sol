@@ -40,7 +40,7 @@ contract Binary is ERC2048{
         return StringUtils.concat('data:application/json;utf8,', json);
 	}
 
-	function getNft(uint256 id) public view returns (Nft) {
+	function getNft(uint256 id) public view returns (Nft memory) {
 		return _getNft(id);
 	}
 
