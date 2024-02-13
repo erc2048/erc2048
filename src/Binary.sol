@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
 import "./ERC2048.sol";
 import "./StringUtils.sol";
@@ -12,19 +12,13 @@ contract Binary is ERC2048{
 		_mint(address(this), totalSupply);
 	}
 
-	function getRemainingNativeAmount() public view returns (uint256)  {
-		return balanceOf[address(this)] / _getUnit();
+	function remaining() public view returns (uint256)  {
+		return balanceOf[address(this)];
 	}
 
-	function getInitialMintPrice(uint256 nativeAmount) public pure returns (uint256) {
-		return nativeAmount * 10 ** 15 ;
-	}
-
-	function initialMint(uint256 nativeAmount) public payable {
-		uint256 amount = nativeAmount * _getUnit();
-		require(amount > 0, "Mint amount should > 0");
+	function mint() public payable {
+		uint256 amount = msg.value * 1000; // 0.001 ETH per token
 		require(amount <= balanceOf[address(this)], "Exceed max mint amount");
-		require(msg.value == getInitialMintPrice(nativeAmount), "Attached Ethers doesn't match");
 		_transfer(address(this), msg.sender, amount);
 		treasury.transfer(msg.value);
 	}
