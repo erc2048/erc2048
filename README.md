@@ -1,6 +1,7 @@
 # ERC2048
 Inspired by [ERC404](https://github.com/Pandora-Labs-Org/erc404), ERC2048 is an experimental, mixed ERC20 / ERC721 implementation with native liquidity and fractionalization.
 
+![](./assets/protocol.jpg)
 ## Compared to ERC404
 In ERC404, there is a 1:1 mapping between FT and NFT. This caused two challenging issues:
 
