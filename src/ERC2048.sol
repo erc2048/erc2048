@@ -159,6 +159,7 @@ abstract contract ERC2048 {
             _transfer(from, to, amountOrId);
         } else {
             address owner = _ownerOf(amountOrId);
+            uint8 level = _extractLevelFromNftId(amountOrId);
 
             if (from != owner) {
                 revert NotNftOwner();
@@ -242,16 +243,15 @@ abstract contract ERC2048 {
 		uint256 burnNftDigits = oldBalance ^ (oldBalance & newBalance);
 		uint256 mintNftDigits = newBalance ^ (oldBalance & newBalance);
 
-		uint32 userId = _getUserIdOrSetNext(owner);
+		uint32 ownerId = _getOwnerIdOrSetNext(owner);
 
         uint8 level = 0;
 
 		while (burnNftDigits > 0) {
 			if (burnNftDigits & 1 == 1) {
-				uint256 nftId = _buildNftId(userId, level);
+				uint256 id = _buildNftId(ownerId, level);
 
-                _ownerOf(id);
-				emit ERC721Events.Transfer(owner, address(0), nftId);
+				emit ERC721Events.Transfer(owner, address(0), id);
 			}
 			level += 1;
 			burnNftDigits >>= 1;
@@ -261,9 +261,9 @@ abstract contract ERC2048 {
 
 		while (mintNftDigits > 0) {
 			if (mintNftDigits & 1 > 0) {
-				uint256 nftId = _buildNftId(userId, level);
+				uint256 id = _buildNftId(ownerId, level);
 
-				emit ERC721Events.Transfer(address(0), owner, nftId);
+				emit ERC721Events.Transfer(address(0), owner, id);
 			}
 			level += 1;
 			mintNftDigits >>= 1;
@@ -273,7 +273,7 @@ abstract contract ERC2048 {
     function _ownerOf(uint256 id) internal view returns (address) {
 		uint32 ownerId = _extractOwnerIdFromNftId(id);
 
-		owner = ownerById[ownerId];
+		address owner = ownerById[ownerId];
 
         if (!_isNftOwned(id, owner)) {
             revert NftNotFound();
@@ -282,7 +282,7 @@ abstract contract ERC2048 {
         return owner;
     }
 
-    function _getUserIdOrSetNext(address owner) internal returns (uint32) {
+    function _getOwnerIdOrSetNext(address owner) internal returns (uint32) {
 		if(idByOwner[owner] == 0) {
 			uniqueId += 1;
 			idByOwner[owner] = uniqueId;
@@ -295,7 +295,7 @@ abstract contract ERC2048 {
 		return amountOrId > 0xffffffffff;
 	}
 
-    function _isNftOwned(uint8 id, address owner) internal view returns (bool) {
+    function _isNftOwned(uint256 id, address owner) internal view returns (bool) {
         uint8 level = _extractLevelFromNftId(id);
         uint256 nativeBalance = balanceOf[owner] / _getUnit();
         return owner != address(0) && nativeBalance & uint256(1) << level > 0;
