@@ -181,19 +181,19 @@ abstract contract ERC2048 {
 
     /// @notice This function is meaningless for ERC2048
     function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id
+        address /* from */,
+        address /* to */,
+        uint256 /* id */
     ) virtual public {
         revert Unimplemented();
     }
 
     /// @notice This function is meaningless for ERC2048
     function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        bytes calldata data
+        address /* from */,
+        address /* to */,
+        uint256 /* id */,
+        bytes calldata /* data */
     ) virtual public {
         revert Unimplemented();
     }
