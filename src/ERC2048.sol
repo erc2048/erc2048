@@ -106,15 +106,16 @@ abstract contract ERC2048 {
     }
 
     /// @notice Function to find owner of a given native token
-    function ownerOf(uint256 id) public view virtual returns (address owner) {
-		(uint32 userId, uint level ) = _getUserIdAndLevel(id);
+    function ownerOf(uint256 id) public view virtual returns (address) {
+		uint32 userId = _calcUserIdByNftId(id);
+
 		owner = ownerOfUserId[userId];
-        if (owner == address(0)) {
+
+        if (!_isNftOwned(id, owner)) {
             revert NotFound();
         }
-        if (!_isOwn(owner,level)) {
-            revert NotFound();
-        }
+
+        return owner;
     }
 
     /// @notice tokenURI must be implemented by child contract
@@ -133,11 +134,6 @@ abstract contract ERC2048 {
 
             if (msg.sender != owner && !isApprovedForAll[owner][msg.sender]) {
                 revert Unauthorized();
-            }
-
-			(, uint8 level) = _getUserIdAndLevel(amountOrId);
-            if (!_isOwn(owner,level)) {
-                revert NotFound();
             }
 
             getApproved[amountOrId] = spender;
@@ -166,15 +162,15 @@ abstract contract ERC2048 {
         address to,
         uint256 amountOrId
     ) public virtual {
+        if (to == address(0)) {
+            revert InvalidRecipient();
+        }
+
         if (_isNftIdOrAmount(amountOrId)) {
-			(uint32 userId, uint8 level) = _getUserIdAndLevel(amountOrId);
-			address owner = ownerOfUserId[userId];
+			address owner = ownerOf(amountOrId);
+
             if (from != owner) {
                 revert InvalidSender();
-            }
-
-            if (to == address(0)) {
-                revert InvalidRecipient();
             }
 
             if (
@@ -183,10 +179,6 @@ abstract contract ERC2048 {
                 msg.sender != getApproved[amountOrId]
             ) {
                 revert Unauthorized();
-            }
-
-            if (!_isOwn(owner,level)) {
-                revert NotFound();
             }
 
 			_transfer(from, to, _getTokenAmount(level));
@@ -252,6 +244,10 @@ abstract contract ERC2048 {
         address to,
         uint256 amount
     ) virtual internal returns (bool) {
+        if (to == address(0)) {
+            revert InvalidRecipient();
+        }
+
 		uint256 oldBalanceOfFrom = balanceOf[from];
         balanceOf[from] -= amount;
 
@@ -260,8 +256,8 @@ abstract contract ERC2048 {
 
         emit ERC20Events.Transfer(from, to, amount);
 
-		_emitNftEventsByBalance(from, oldBalanceOfFrom, balanceOf[from]);
-		_emitNftEventsByBalance(to, oldBalanceOfTo, balanceOf[to]);
+		_rebuildNft(from, oldBalanceOfFrom, balanceOf[from]);
+		_rebuildNft(to, oldBalanceOfTo, balanceOf[to]);
 
         return true;
     }
@@ -271,7 +267,7 @@ abstract contract ERC2048 {
 		return amountOrId <= (0xffffffffff);
 	}
 
-	function _emitNftEventsByBalance(address owner, uint256 oldBalance, uint256 newBalance) internal {
+	function _rebuildNft(address owner, uint256 oldBalance, uint256 newBalance) internal {
 		if (owner == address(0)) {
 			return;
 		}
@@ -288,7 +284,7 @@ abstract contract ERC2048 {
 
 		while (burnNftDigits > 0) {
 			if (burnNftDigits & 1 == 1) {
-				uint256 nftId = _getNftId(userId, level);
+				uint256 nftId = _calcNftId(userId, level);
 
                 ownerOf(id);
 				emit ERC721Events.Transfer(owner, address(0), nftId);
@@ -301,7 +297,7 @@ abstract contract ERC2048 {
 
 		while (mintNftDigits > 0) {
 			if (mintNftDigits & 1 > 0) {
-				uint256 nftId = _getNftId(userId, level);
+				uint256 nftId = _calcNftId(userId, level);
 
 				emit ERC721Events.Transfer(address(0), owner, nftId);
 			}
@@ -335,23 +331,15 @@ abstract contract ERC2048 {
         symbol = _symbol;
     }
 
-	function _getNftId(uint32 userId, uint8 level) virtual pure internal returns (uint256) {
+	function _calcNftId(uint32 userId, uint8 level) virtual pure internal returns (uint256) {
 		return (uint256(userId) << 8) + level;
 	}
 
-	function _getUserIdAndLevel(uint256 nftId) virtual pure internal returns (uint32 userId, uint8 level) {
-        if(nftId>0xffffffffff) {
-            revert InvalidNftId();
-        }
-		userId = _getUserIdByNftId(nftId);
-        level = _getNftLevelByNftId(nftId);
-	}
-
-	function _getUserIdByNftId(uint256 nftId)virtual pure internal returns (uint32){
+	function _calcUserIdByNftId(uint256 nftId)virtual pure internal returns (uint32){
 		return uint32(nftId >> 8 & 0xffffffff);
 	}
 
-	function _getNftLevelByNftId(uint256 nftId) virtual pure internal returns(uint8) {
+	function _calcNftLevelByNftId(uint256 nftId) virtual pure internal returns(uint8) {
 		return uint8(nftId & 0xff);
 	}
 
@@ -367,7 +355,7 @@ abstract contract ERC2048 {
 
 			while (balance > 0) {
 				if (balance & 1 > 0) {
-					uint256 nftId = _getNftId(userId, level);
+					uint256 nftId = _calcNftId(userId, level);
 					Nft memory nft = Nft({
 						nftId: nftId,
 						owner: owner,
@@ -394,8 +382,10 @@ abstract contract ERC2048 {
         }
 	}
 
-    function _isOwn(address owner, uint nftLevel) virtual internal view returns(bool){
-        return (balanceOf[address] / _getUnit()) & (uint256(1) << nftLevel) >0;
+    function _isNftOwned(uint8 nftId, address owner) virtual internal view returns (bool) {
+        uint8 level = _calcNftLevelByNftId(nftId);
+        uint256 nativeBalance = balanceOf[owner] / _getUnit();
+        return owner != address(0) && nativeBalance & uint256(1) << level > 0;
     }
 
     function _mint(address owner, uint256 amount) virtual internal {

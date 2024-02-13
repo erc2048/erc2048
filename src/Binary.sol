@@ -75,9 +75,9 @@ contract Binary is ERC2048{
 	}
 
 	function tokenURI(uint256 id) pure public override returns (string memory) {
-        // todo whether token exists
+        ownerOf(id); // check NFT exists
 
-        uint8 level = _getNftLevelByNftId(id);
+        uint8 level = _calcNftLevelByNftId(id);
         string memory idStr = StringUtils.uintToString(id);
         string memory numberStr = StringUtils.uintToString(2 ** level);
 
