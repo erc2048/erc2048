@@ -54,10 +54,10 @@ abstract contract ERC2048 {
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     /// @dev Unique id by owner
-	mapping(address => uint32) public idByOwner;
+	mapping(address => uint32) private idByOwner;
 
     /// @dev Owner by unique id
-	mapping(uint32 => address) public ownerById;
+	mapping(uint32 => address) private ownerById;
 
     /// @dev Global unique id
 	uint32 private uniqueId;
