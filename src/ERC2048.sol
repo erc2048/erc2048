@@ -29,13 +29,6 @@ library ERC721Events {
 ///         design.
 ///
 abstract contract ERC2048 {
-    error NftNotFound();
-    error NotNftOwner();
-    error InvalidRecipient();
-    error UnsafeRecipient();
-    error Unauthorized();
-    error Unimplemented();
-
     /// @dev Token name
     string public name;
 
@@ -82,7 +75,7 @@ abstract contract ERC2048 {
         uint8 _decimals,
         uint256 _nativeTotalSupply
     ) {
-        require(_decimals >= 18, "Decimals should >= 18");
+        require(_decimals >= 18, "decimals should >= 18");
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -108,9 +101,7 @@ abstract contract ERC2048 {
         } else {
             address owner = _ownerOf(amountOrId);
 
-            if (msg.sender != owner && !isApprovedForAll[owner][msg.sender]) {
-                revert Unauthorized();
-            }
+            require(msg.sender == owner, "Unauthorized");
 
             getApproved[amountOrId] = spender;
 
@@ -137,41 +128,35 @@ abstract contract ERC2048 {
     }
 
     /// @notice Function for mixed transfers
-    /// @dev This function assumes id / native if amount less than or equal to current max id
+    /// @dev This function assumes id if amount less than or equal to current max id
     function transferFrom(
         address from,
         address to,
         uint256 amountOrId
     ) virtual public {
         require(amountOrId > 0, "amountOrId must > 0");
-
-        if (to == address(0)) {
-            revert InvalidRecipient();
-        }
+        require(to != address(0), "Invalid recipient");
 
         if (_isAmountOrId(amountOrId)) {
             uint256 senderAllowance = allowance[from][msg.sender];
 
-            if (senderAllowance != type(uint256).max) {
-                allowance[from][msg.sender] = senderAllowance - amountOrId;
-            }
+            require(senderAllowance >= amountOrId, "Insufficient allowance");
+
+            allowance[from][msg.sender] = senderAllowance - amountOrId;
 
             _transfer(from, to, amountOrId);
         } else {
             address owner = _ownerOf(amountOrId);
             uint8 level = _extractLevelFromNftId(amountOrId);
 
-            if (from != owner) {
-                revert NotNftOwner();
-            }
+            require(from == owner, "Not NFT owner");
 
-            if (
-                msg.sender != from &&
-                !isApprovedForAll[from][msg.sender] &&
-                msg.sender != getApproved[amountOrId]
-            ) {
-                revert Unauthorized();
-            }
+            require(
+                msg.sender == from ||
+                isApprovedForAll[from][msg.sender] ||
+                msg.sender == getApproved[amountOrId],
+                "Unauthorized"
+            );
 
 			_transfer(from, to, _calcTokenAmountByLevel(level));
 
@@ -185,7 +170,7 @@ abstract contract ERC2048 {
         address /* to */,
         uint256 /* id */
     ) virtual public {
-        revert Unimplemented();
+        revert("Unimplemented");
     }
 
     /// @notice This function is meaningless for ERC2048
@@ -195,7 +180,7 @@ abstract contract ERC2048 {
         uint256 /* id */,
         bytes calldata /* data */
     ) virtual public {
-        revert Unimplemented();
+        revert("Unimplemented");
     }
 
     /// @notice Function to find owner of a given id
@@ -214,9 +199,7 @@ abstract contract ERC2048 {
         address to,
         uint256 amount
     ) internal returns (bool) {
-        if (to == address(0)) {
-            revert InvalidRecipient();
-        }
+        require(to != address(0), "Invalid recipient");
 
 		uint256 oldBalanceOfFrom = balanceOf[from];
         balanceOf[from] -= amount;
@@ -275,9 +258,7 @@ abstract contract ERC2048 {
 
 		address owner = ownerById[ownerId];
 
-        if (!_isNftOwned(id, owner)) {
-            revert NftNotFound();
-        }
+        require(_isNftOwned(id, owner), "NFT not found");
 
         return owner;
     }
@@ -299,6 +280,18 @@ abstract contract ERC2048 {
         uint8 level = _extractLevelFromNftId(id);
         uint256 nativeBalance = balanceOf[owner] / _getUnit();
         return owner != address(0) && nativeBalance & uint256(1) << level > 0;
+    }
+
+    function _getNft(uint256 id) internal view returns (Nft) {
+        address owner = _ownerOf(id);
+        uint32 ownerId = _extractOwnerIdFromNftId(id);
+        uint8 level = _extractLevelFromNftId(id);
+        return Nft({
+            id: id,
+            owner: owner,
+            ownerId: ownerId,
+            level: level
+        });
     }
 
 	function _getOwnerNfts(address owner) internal view returns (Nft[] memory) {
