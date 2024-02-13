@@ -1,4 +1,4 @@
 <svg width="100" height="100" version="1.1" xmlns="http://www.w3.org/2000/svg">
     <rect x="0" y="0" width="100" height="100" fill="#C2185B" rx="6" ry="6" />
-    <text x="50" y="50" alignment-baseline="middle" text-anchor="middle" font-size="25" class="number" fill="#e7ddd4">262144</text>
+    <text x="50" y="50" alignment-baseline="middle" text-anchor="middle" font-size="20" font-family="Source Code Pro" class="number" fill="#ece4db">262144</text>
 </svg>
