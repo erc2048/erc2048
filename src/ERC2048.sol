@@ -101,7 +101,7 @@ abstract contract ERC2048 {
         } else {
             address owner = _ownerOf(amountOrId);
 
-            require(msg.sender == owner, "Unauthorized");
+            require(msg.sender == owner, "Not NFT owner");
 
             getApproved[amountOrId] = spender;
 
