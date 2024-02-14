@@ -123,7 +123,6 @@ abstract contract ERC2048 {
         address to,
         uint256 amount
     ) virtual public returns (bool) {
-        require(amount > 0, "amount must > 0");
         return _transfer(msg.sender, to, amount);
     }
 
@@ -134,7 +133,6 @@ abstract contract ERC2048 {
         address to,
         uint256 amountOrId
     ) virtual public {
-        require(amountOrId > 0, "amountOrId must > 0");
         require(to != address(0), "Invalid recipient");
 
         if (_isAmountOrId(amountOrId)) {
@@ -193,12 +191,17 @@ abstract contract ERC2048 {
         _transfer(address(0), owner, amount);
     }
 
+    function _remaining() internal view returns (uint256)  {
+		return balanceOf[address(0)];
+	}
+
     /// @notice Internal function for fractional transfer
     function _transfer(
         address from,
         address to,
         uint256 amount
     ) internal returns (bool) {
+        require(amount > 0, "Zero amount");
         require(to != address(0), "Invalid recipient");
 
 		uint256 oldBalanceOfFrom = balanceOf[from];

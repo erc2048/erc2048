@@ -9,17 +9,17 @@ contract Binary is ERC2048{
 
 	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 2048 * 2048) {
 		treasury = _treasury;
-		_mint(address(this), totalSupply);
 	}
 
 	function remaining() public view returns (uint256)  {
-		return balanceOf[address(this)];
+		return _remaining();
 	}
 
 	function mint() public payable {
+		require(msg.value > 0, "Attached ETH must > 0");
 		uint256 amount = msg.value * 10000; // 0.0001 ETH per token
-		require(amount <= balanceOf[address(this)], "Exceed max mint amount");
-		_transfer(address(this), msg.sender, amount);
+		require(amount <= remaining(), "Exceed max mint amount");
+		_mint(msg.sender, amount);
 		treasury.transfer(msg.value);
 	}
 
