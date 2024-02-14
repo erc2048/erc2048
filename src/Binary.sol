@@ -7,7 +7,7 @@ import "./StringUtils.sol";
 contract Binary is ERC2048{
 	address payable public treasury;
 
-	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 1024 ** 2) {
+	constructor(address payable _treasury) ERC2048("Binary", "BINARY", 18, 2048 * 2048) {
 		treasury = _treasury;
 		_mint(address(this), totalSupply);
 	}
@@ -17,7 +17,7 @@ contract Binary is ERC2048{
 	}
 
 	function mint() public payable {
-		uint256 amount = msg.value * 1000; // 0.001 ETH per token
+		uint256 amount = msg.value * 10000; // 0.0001 ETH per token
 		require(amount <= balanceOf[address(this)], "Exceed max mint amount");
 		_transfer(address(this), msg.sender, amount);
 		treasury.transfer(msg.value);
